@@ -21,7 +21,7 @@ MIN_HANZI = 1000
 BATCH_SIZE = 5
 
 def normalize(text):
-    return re.sub(r"\\s+", "", text).lower()
+    return re.sub(r"\s+", "", text).lower()
 
 def get_title_and_body(raw):
     lines = raw.strip().splitlines()
@@ -34,7 +34,7 @@ def get_title_and_body(raw):
     return title, body
 
 def get_images(body):
-    return re.findall(r"!\\[[^\\]]*\\]\\(([^)]+)\\)", body)
+    return re.findall(r"!\[[^\]]*\]\(([^)]+)\)", body)
 
 def check_image_links(body):
     links = get_images(body)
@@ -95,7 +95,7 @@ def main():
             break
         try:
             title, body = get_title_and_body(draft.read_text(encoding="utf-8"))
-            length = len(re.findall(r"[\\u4e00-\\u9fff]", body))
+            length = len(re.findall(r"[\u4e00-\u9fff]", body))
             if length < MIN_HANZI:
                 raise ValueError(f"Only {length} Chinese characters; need >= {MIN_HANZI}")
             check_image_links(body)
