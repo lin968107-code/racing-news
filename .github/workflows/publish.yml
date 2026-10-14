@@ -13,6 +13,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Auto update
+      - name: Generate Posts
         run: |
-          echo "自动发布系统已启动"
+          python scripts/generate_posts.py
