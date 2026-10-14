@@ -219,7 +219,7 @@ articles = [
 """
 },
 
-]for index, article in enumerate(articles, start=1):
+for index, article in enumerate(articles, start=1):
 
     filename = (
         f"{datetime.now().strftime('%Y-%m-%d')}"
