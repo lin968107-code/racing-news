@@ -1,0 +1,7 @@
+title: 赛车新闻
+description: 赛车资讯、汽车技术、赛车文化与行业内容平台
+theme: minima
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
