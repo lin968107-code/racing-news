@@ -9,6 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,3 +19,11 @@ jobs:
       - name: Generate Posts
         run: |
           python scripts/generate_posts.py
+
+      - name: Commit Posts
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add .
+          git commit -m "Auto generate posts" || exit 0
+          git push
