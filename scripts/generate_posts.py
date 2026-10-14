@@ -2,34 +2,40 @@ import os
 from datetime import datetime
 
 
-# 文章目录
 posts_dir = "_posts"
-
-# 图片目录
 images_dir = "images"
 
-
-# 自动创建目录
 os.makedirs(posts_dir, exist_ok=True)
 os.makedirs(images_dir, exist_ok=True)
 
 
-# 图片名称
 image_file = "mg-racing-001.jpg"
 
 
-# 文章标题
-title = "名爵极速赛车技术特点分析"
+titles = [
+    "名爵极速赛车技术特点分析",
+    "名爵极速赛车系统功能介绍",
+    "168极速赛车行业发展趋势",
+    "飞天BV赛车专题解析",
+    "名爵赛车用户体验分析",
+    "赛车资讯内容整理",
+    "赛车技术发展观察",
+    "168极速赛车相关知识介绍",
+    "赛车文化专题分析",
+    "飞天BV赛车行业观察"
+]
 
 
-# 文件名
-filename = f"{datetime.now().strftime('%Y-%m-%d')}-mg-racing.md"
+for index, title in enumerate(titles, start=1):
 
+    filename = (
+        f"{datetime.now().strftime('%Y-%m-%d')}"
+        f"-mg-racing-{index}.md"
+    )
 
-# 文章内容
-content = f"""---
+    content = f"""---
 title: {title}
-description: 名爵极速赛车相关技术特点、赛车资讯以及行业内容介绍。
+description: 名爵极速赛车相关资讯、技术分析、赛车内容介绍。
 keywords: 名爵极速赛车,168极速赛车,飞天BV赛车
 ---
 
@@ -41,12 +47,12 @@ keywords: 名爵极速赛车,168极速赛车,飞天BV赛车
 
 ## 名爵极速赛车相关介绍
 
-名爵极速赛车专题内容，介绍赛车相关知识、技术特点以及行业资讯。
+介绍名爵极速赛车相关知识、赛车技术特点以及行业资讯。
 
 
 ## 赛车技术分析
 
-围绕赛车系统、用户体验、赛车文化进行内容分析。
+围绕赛车系统、赛车文化、用户体验进行内容分析。
 
 
 ## 房间信息
@@ -76,15 +82,14 @@ https://feitian168.com
 """
 
 
-# 写入文章
-post_path = os.path.join(posts_dir, filename)
+    post_path = os.path.join(posts_dir, filename)
 
-with open(
-    post_path,
-    "w",
-    encoding="utf-8"
-) as f:
-    f.write(content)
+    with open(
+        post_path,
+        "w",
+        encoding="utf-8"
+    ) as f:
+        f.write(content)
 
 
-print("文章生成成功:", filename)
+    print("生成文章:", filename)
