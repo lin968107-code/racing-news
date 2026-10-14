@@ -2,28 +2,54 @@ name: Auto Publish
 
 on:
   schedule:
+    # Beijing time (UTC+8): 08:00, 13:00, 20:00
     - cron: "0 0 * * *"
+    - cron: "0 5 * * *"
+    - cron: "0 12 * * *"
   workflow_dispatch:
+    inputs:
+      batch:
+        description: "Batch to publish"
+        required: true
+        type: choice
+        options:
+          - morning
+          - noon
+          - evening
+
+concurrency:
+  group: daily-publishing
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Generate Posts
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+          MANUAL_BATCH: ${{ inputs.batch }}
         run: |
-          python scripts/generate_posts.py
-
+          case "$SCHEDULE" in
+            "0 0 * * *") BATCH=morning ;;
+            "0 5 * * *") BATCH=noon ;;
+            "0 12 * * *") BATCH=evening ;;
+            *) BATCH="$MANUAL_BATCH" ;;
+          esac
+          if [ -z "$BATCH" ]; then echo "No publishing batch selected"; exit 1; fi
+          python scripts/generate_posts.py --batch "$BATCH"
       - name: Commit Posts
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add .
-          git commit -m "Auto generate posts" || exit 0
-          git push
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add _posts
+          if git diff --cached --quiet; then
+            echo "No new posts to commit"
+          else
+            git commit -m "Auto publish batch"
+            git push
+          fi
