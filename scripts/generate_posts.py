@@ -1,5 +1,7 @@
 import os
 from datetime import datetime
+from zoneinfo import ZoneInfo
+import argparse
 
 
 posts_dir = "_posts"
@@ -221,12 +223,21 @@ articles = [
 
 ]
 
-for index, article in enumerate(articles, start=1):
+parser = argparse.ArgumentParser()
+parser.add_argument("--batch", choices=("morning", "noon", "evening"), required=True)
+args = parser.parse_args()
 
-    filename = (
-        f"{datetime.now().strftime('%Y-%m-%d')}"
-        f"-mg-racing-{index}.md"
-    )
+# Use China local date for the content publishing schedule.
+local_date = datetime.now(ZoneInfo("Asia/Shanghai")).strftime("%Y-%m-%d")
+slot_number = {"morning": 0, "noon": 1, "evening": 2}[args.batch]
+
+for index, article in enumerate(articles, start=1):
+    post_index = slot_number * len(articles) + index
+    filename = f"{local_date}-mg-racing-{post_index:02d}.md"
+    post_path = os.path.join(posts_dir, filename)
+    if os.path.exists(post_path):
+        print("Already exists, skipping:", filename)
+        continue
 
     content = f"""---
 title: {article['title']}
@@ -269,8 +280,6 @@ https://feitian168.com
 持续更新赛车资讯、技术分析以及行业内容。
 """
 
-
-    post_path = os.path.join(posts_dir, filename)
 
     with open(
         post_path,
