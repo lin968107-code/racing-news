@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 
 DRAFTS = Path("_drafts")
 POSTS = Path("_posts")
+MIRRORS = Path("articles")
 IMAGES = Path("images")
 BATCHES = {"morning": 0, "noon": 1, "evening": 2}
 MIN_HANZI = 1000
@@ -80,12 +81,17 @@ def compose(title, body):
     )
     return metadata + "# " + page_title + "\n\n" + body + footer
 
+def page_title_for_mirror(title):
+    topic = re.sub(r"^(名爵168极速赛车|168极速赛车群|飞天BV房间|飞天BV赛车|168极速赛车)[：:｜|\\s]*", "", title).strip() or title
+    return f"名爵168极速赛车房间号998788｜微Q：1177368｜{topic}"
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--batch", required=True, choices=BATCHES)
     args = parser.parse_args()
     POSTS.mkdir(exist_ok=True)
     DRAFTS.mkdir(exist_ok=True)
+    MIRRORS.mkdir(exist_ok=True)
     date = datetime.now(ZoneInfo("Asia/Shanghai")).strftime("%Y-%m-%d")
     slot = BATCHES[args.batch]
     existing_in_slot = list(POSTS.glob(f"{date}-{args.batch}-*.md"))
@@ -127,7 +133,16 @@ def main():
         except (ValueError, UnicodeError) as exc:
             print(f"SKIP {draft.name}: {exc}")
             continue
+        # Create a GitHub-readable .md companion, with working relative images.
+        mirror = MIRRORS / filename
+        mirror_image = "../images/" + poster.relative_to(IMAGES).as_posix()
+        mirror_text = "# " + page_title_for_mirror(title) + "\n\n"
+        mirror_text += f"![文章配图]({mirror_image})\n\n" + body
+        mirror_text += "\n\n## 相关信息\n\n名爵房间号998788\n\n微Q：1177368\n"
+        if mirror.exists():
+            raise ValueError("Mirror already exists")
         output.write_text(content, encoding="utf-8")
+        mirror.write_text(mirror_text, encoding="utf-8")
         draft.unlink()
         prior_titles.add(title)
         prior_bodies.append(normalized)
