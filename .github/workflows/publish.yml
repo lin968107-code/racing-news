@@ -29,6 +29,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Generate AI Drafts
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-4.1-mini
+          SCHEDULE: ${{ github.event.schedule }}
+          MANUAL_BATCH: ${{ inputs.batch }}
+        run: |
+          case "$SCHEDULE" in
+            "0 0 * * *") BATCH=morning ;;
+            "0 5 * * *") BATCH=noon ;;
+            "0 12 * * *") BATCH=evening ;;
+            *) BATCH="$MANUAL_BATCH" ;;
+          esac
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::warning::OPENAI_API_KEY missing; cannot generate new articles"
+          else
+            python scripts/ai_generate.py --batch "$BATCH"
+          fi
       - name: Generate Posts
         env:
           SCHEDULE: ${{ github.event.schedule }}
