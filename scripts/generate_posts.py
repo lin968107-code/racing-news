@@ -19,7 +19,7 @@ IMAGES = Path("images")
 BATCHES = {"morning": 0, "noon": 1, "evening": 2}
 MIN_HANZI = 1000
 BATCH_SIZE = 5
-SEO_KEYWORDS = ["名爵极速赛车168", "名爵168赛车", "168极速赛车", "168极速赛车群", "极速赛车平台"]
+SEO_KEYWORDS = ["名爵168极速赛车", "168极速赛车群", "飞天BV房间", "名爵房间号998788", "微Q：1177368"]
 POSTER_DIR = IMAGES / "赛车海报_10张独立图片" / "GitHub_upload_10_JPG_Q1177368"
 POSTER_FILES = [POSTER_DIR / f"racing_poster_{i:02d}.jpg" for i in range(1, 11)]
 
@@ -60,8 +60,10 @@ def load_prior():
     return prior_titles, prior_bodies
 
 def compose(title, body):
-    page_title = f"{title} | 998788房间 | 微:Q1177368"
-    description = f"{title}相关介绍；998788房间信息、微:Q1177368及相关赛车资讯。"
+    # Keep the requested search-result identity visible, while giving every article a distinct topic.
+    topic = re.sub(r"^(名爵168极速赛车|168极速赛车群|飞天BV房间|飞天BV赛车|168极速赛车)[：:｜|\s]*", "", title).strip() or title
+    page_title = f"名爵168极速赛车房间号998788｜微Q：1177368｜{topic}"
+    description = f"名爵168极速赛车、168极速赛车群、飞天BV房间相关资料；本文介绍{topic}，并说明名爵房间号998788与微Q：1177368的标识信息。"
     metadata = (
         "---\n"
         "layout: post\n"
@@ -72,8 +74,8 @@ def compose(title, body):
     )
     footer = (
         "\n\n## 相关信息\n\n"
-        "998788房间\n\n"
-        "微:Q1177368\n\n"
+        "名爵房间号998788\n\n"
+        "微Q：1177368\n\n"
         "网站：https://feitian168.com/\n"
     )
     return metadata + "# " + title + "\n\n" + body + footer
