@@ -16,6 +16,7 @@ on:
           - morning
           - noon
           - evening
+          - bulk
 
 concurrency:
   group: daily-publishing
@@ -45,7 +46,11 @@ jobs:
           if [ -z "$OPENAI_API_KEY" ]; then
             echo "::warning::OPENAI_API_KEY missing; cannot generate new articles"
           else
+            if [ "$BATCH" = "bulk" ]; then
+            echo "Bulk mode uses existing reviewed drafts only; no automatic 100-copy generation."
+          else
             python scripts/ai_generate.py --batch "$BATCH"
+          fi
           fi
       - name: Generate Posts
         env:
@@ -64,7 +69,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A _posts _drafts
+          git add -A _posts _drafts articles
           if git diff --cached --quiet; then
             echo "No new posts to commit"
           else
