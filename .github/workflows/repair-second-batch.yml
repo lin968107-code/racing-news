@@ -1,0 +1,44 @@
+name: Repair second batch article paths
+on:
+  push:
+    paths:
+      - '.github/workflows/repair-second-batch.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Move second batch files to articles folder
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          old=Path('articles/articles')
+          dest=Path('articles')
+          files=sorted(old.glob('*.md'))
+          if not files:
+              print('Nothing to move')
+              raise SystemExit(0)
+          for src in files:
+              dst=dest/src.name
+              if dst.exists():
+                  raise SystemExit('Destination already exists: '+str(dst))
+          for src in files:
+              raw=src.read_text(encoding='utf-8')
+              raw=re.sub(r'!\[([^\]]*)\]\((?:\.\./)+images/unified-cover\.png\)',r'![\1](../images/unified-cover.png)',raw)
+              (dest/src.name).write_text(raw,encoding='utf-8')
+              src.unlink()
+          print('Moved',len(files),'files')
+          PY
+      - name: Save changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A articles
+          if ! git diff --cached --quiet; then
+            git commit -m "Move second batch Markdown files into correct articles directory"
+            git push
+          fi
