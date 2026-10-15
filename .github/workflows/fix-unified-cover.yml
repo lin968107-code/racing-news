@@ -1,0 +1,48 @@
+name: Fix article cover references
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-unified-cover.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-covers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Replace article image paths
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          image = Path("images/unified-cover.png")
+          if not image.is_file():
+              raise SystemExit("Missing images/unified-cover.png")
+          files = list(Path("articles").glob("*.md"))
+          edited = 0
+          for file in files:
+              raw = file.read_text(encoding="utf-8")
+              fixed, n = re.subn(r'!\[[^\]]*\]\((?:\.\./images/|/images/)[^)]+\)', '![名爵168极速赛车黑金统一封面](../images/unified-cover.png)', raw)
+              if n and fixed != raw:
+                  file.write_text(fixed, encoding="utf-8")
+                  edited += 1
+          print(f"checked {len(files)} articles, changed {edited}")
+          PY
+      - name: Save updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add articles/
+          if git diff --cached --quiet; then
+            echo "No image references needed updating."
+          else
+            git commit -m "Use unified black-gold cover for existing articles"
+            git push
+          fi
