@@ -1,0 +1,56 @@
+name: Clean up 100 article filenames and headings
+on:
+  push:
+    paths:
+      - '.github/workflows/clean-100-titles.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rename numbered files and match their headings
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from datetime import date,timedelta
+          import re
+          folder=Path("articles")
+          files=sorted(folder.glob("[0-9][0-9][0-9]-*.md"))
+          if len(files)!=100 or [int(p.name[:3]) for p in files]!=list(range(1,101)):
+              raise SystemExit("Expected exactly 100 numbered articles, aborting to prevent accidental changes.")
+          changes=[]
+          for n,src in enumerate(files,1):
+              body=src.read_text(encoding="utf-8")
+              first,sep,rest=body.partition("\n")
+              if not first.startswith("# "): raise SystemExit(f"Missing H1: {src}")
+              # Topic is derived from this article's existing actual subject, rather than inventing an unrelated one.
+              old=src.stem[4:]
+              old=re.sub(r"-名爵168极速赛车资料整理$", "",old)
+              old=re.sub(r"^[^-]+专题-", "",old)
+              old=old.strip("- ") or "相关信息介绍"
+              day=(date(2026,10,16)+timedelta(days=n-1)).strftime("%Y.%m.%d")
+              title=f"{day}｜名爵168极速赛车｜房间号998788｜微Q：1177368｜{old}"
+              # Keep the body and image paths unchanged.
+              new="# "+title+sep+rest
+              newname=f"{n:03d}-{day}-名爵168极速赛车-房间号998788-微Q1177368-{old}.md"
+              dst=folder/newname
+              if dst!=src and dst.exists(): raise SystemExit(f"Destination exists: {dst}")
+              changes.append((src,dst,new))
+          for src,dst,new in changes:
+              dst.write_text(new,encoding="utf-8")
+              if src!=dst: src.unlink()
+          print(f"Updated {len(changes)} articles; dates {date(2026,10,16)} through {date(2026,10,16)+timedelta(days=99)}")
+          PY
+      - name: Commit renamed articles
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A articles/
+          if ! git diff --cached --quiet; then
+            git commit -m "Clean 100 article filenames and sequential dated headings"
+            git push
+          fi
