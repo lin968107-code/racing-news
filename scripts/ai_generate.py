@@ -70,7 +70,7 @@ def ask_ai(topic, date, batch, number, key, model):
 正文要求：以主题为中心，目标1500汉字、至少1100汉字，4个以上实质小标题；强调搜索信息核对、页面导航、公开信息阅读方法、账号安全及常见问题，避免套话和重复堆词。不同稿件必须有不同的结构和实质内容。
 已确认的资料仅有：关联网址 https://feitian168.com/ 、名爵房间号998788、联系标注“微Q：1177368”；在文章中可准确列出，但不可推断该网站的运营主体、资质、具体功能、下载入口、资金支付安排、赛事真实性、监管认证或承诺效果。未经可核验来源，不要声称你已访问网站、已验证房间、已查到实时数据，也不要捏造用户评价、排名、新闻、合作关系、收益或安全保证。
 避免把“名爵”写成汽车制造商品牌的官方关联。不要写博彩投注教学、平台合法性保证或劝诱下注。
-仅引用一次现有图片：![赛车示意图片](/images/mg-racing-001.jpg)。图片是主题配图，不是平台产品功能截图。
+图片由发布程序自动插入，不要在草稿中添加图片Markdown。
 只输出Markdown文章，不输出开场解释或代码围栏。"""
     data = json.dumps({"model": model, "messages": [
         {"role": "system", "content": "你是谨慎的中文网站专题编辑。专注准确描述、来源边界、信息核验和用户可读性，绝不编造具体网站事实。"},
@@ -115,8 +115,8 @@ def main():
         if not title or title.group(1).strip() in titles or not any(term in title.group(1) for term in KEY_TERMS):
             print("Skipped missing/duplicate title for", topic)
             continue
-        if count_hanzi(text) < 1000 or "/images/mg-racing-001.jpg" not in text:
-            print("Skipped insufficient length/missing image for", topic)
+        if count_hanzi(text) < 1000:
+            print("Skipped insufficient length for", topic)
             continue
         draft.write_text(text + "\n", encoding="utf-8")
         titles.add(title.group(1).strip())
