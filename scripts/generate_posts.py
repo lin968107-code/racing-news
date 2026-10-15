@@ -103,6 +103,7 @@ def main():
             if length < MIN_HANZI:
                 raise ValueError(f"Only {length} Chinese characters; need >= {MIN_HANZI}")
             check_image_links(body)
+            body = re.sub(r"(?m)^!\[[^\]]*\]\(/images/[^)]+\)\s*\n?", "", body).strip()
             if title in prior_titles:
                 raise ValueError("Title already published")
             normalized = normalize(body)
