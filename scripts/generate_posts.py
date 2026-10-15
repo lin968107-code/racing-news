@@ -18,7 +18,7 @@ POSTS = Path("_posts")
 IMAGES = Path("images")
 BATCHES = {"morning": 0, "noon": 1, "evening": 2}
 MIN_HANZI = 1000
-BATCH_SIZE = 5
+BATCH_SIZES = {"morning": 7, "noon": 7, "evening": 6}
 SEO_KEYWORDS = ["名爵168极速赛车", "168极速赛车群", "飞天BV房间", "名爵房间号998788", "微Q：1177368"]
 POSTER_DIR = IMAGES / "赛车海报_10张独立图片" / "GitHub_upload_10_JPG_Q1177368"
 POSTER_FILES = [POSTER_DIR / f"racing_poster_{i:02d}.jpg" for i in range(1, 11)]
@@ -89,9 +89,9 @@ def main():
     date = datetime.now(ZoneInfo("Asia/Shanghai")).strftime("%Y-%m-%d")
     slot = BATCHES[args.batch]
     existing_in_slot = list(POSTS.glob(f"{date}-{args.batch}-*.md"))
-    remaining = BATCH_SIZE - len(existing_in_slot)
+    remaining = BATCH_SIZES[args.batch] - len(existing_in_slot)
     if remaining <= 0:
-        print(f"Batch {args.batch} already has 5 posts; no action.")
+        print(f"Batch {args.batch} already has its planned posts; no action.")
         return
     prior_titles, prior_bodies = load_prior()
     missing = [str(p) for p in POSTER_FILES if not p.is_file()]
