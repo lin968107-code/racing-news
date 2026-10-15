@@ -19,6 +19,8 @@ IMAGES = Path("images")
 BATCHES = {"morning": 0, "noon": 1, "evening": 2}
 MIN_HANZI = 1000
 BATCH_SIZE = 5
+POSTER_DIR = IMAGES / "赛车海报_10张独立图片" / "GitHub_upload_10_JPG_Q1177368"
+POSTER_FILES = [POSTER_DIR / f"racing_poster_{i:02d}.jpg" for i in range(1, 11)]
 
 def normalize(text):
     return re.sub(r"\s+", "", text).lower()
@@ -38,11 +40,9 @@ def get_images(body):
 
 def check_image_links(body):
     links = get_images(body)
-    if not links:
-        raise ValueError("Missing photo in article")
     for link in links:
         if not link.startswith("/images/"):
-            raise ValueError("Image must use /images/filename.jpg syntax")
+            raise ValueError("Image must use an /images/ path")
         filename = link.split("/", 2)[-1]
         if not filename or not (IMAGES / filename).is_file():
             raise ValueError("Image does not exist: " + link)
@@ -88,6 +88,10 @@ def main():
         print(f"Batch {args.batch} already has 5 posts; no action.")
         return
     prior_titles, prior_bodies = load_prior()
+    missing = [str(p) for p in POSTER_FILES if not p.is_file()]
+    if missing:
+        raise FileNotFoundError("Missing racing posters: " + ", ".join(missing))
+    prior_image_count = sum(sum("/racing_poster_" in link for link in get_images(p.read_text(encoding="utf-8"))) for p in POSTS.glob("*.md"))
     candidates = sorted(DRAFTS.glob("*.md"))
     published = 0
     for draft in candidates:
@@ -104,7 +108,10 @@ def main():
             normalized = normalize(body)
             if any(normalized == old or SequenceMatcher(None, normalized[:6000], old[:6000]).ratio() > 0.85 for old in prior_bodies):
                 raise ValueError("Near-duplicate of existing article")
-            content = compose(title, body)
+            poster = POSTER_FILES[(prior_image_count + published) % len(POSTER_FILES)]
+            poster_url = "/images/" + poster.relative_to(IMAGES).as_posix()
+            body_with_poster = f"![{title}]({poster_url})\n\n" + body
+            content = compose(title, body_with_poster)
             digest = hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:10]
             filename = f"{date}-{args.batch}-{digest}.md"
             output = POSTS / filename
