@@ -5,3 +5,5 @@ theme: minima
 plugins:
   - jekyll-seo-tag
   - jekyll-sitemap
+url: "https://lin968107-code.github.io"
+baseurl: "/racing-news"
