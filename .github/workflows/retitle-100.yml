@@ -1,0 +1,56 @@
+name: Retitle 100 articles by date
+on:
+  push:
+    paths:
+      - '.github/workflows/retitle-100.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update titles preserving article content
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from datetime import date, timedelta
+          import re
+          folder = Path("articles")
+          paths = sorted(folder.glob("[0-9][0-9][0-9]-*.md"))
+          bynum = {}
+          for p in paths:
+              n = int(p.name[:3])
+              if 1 <= n <= 100:
+                  if n in bynum: raise SystemExit(f"Duplicate article number {n}")
+                  bynum[n] = p
+          if sorted(bynum) != list(range(1,101)):
+              raise SystemExit(f"Expected 001-100, found {len(bynum)}")
+          updated = 0
+          for n, p in sorted(bynum.items()):
+              source = p.read_text(encoding="utf-8")
+              first, sep, rest = source.partition("\n")
+              if not first.startswith("# "):
+                  raise SystemExit(f"Missing H1 in {p}")
+              original = first[2:].strip()
+              # Retains the original unique subject instead of inventing new claims.
+              topic = re.sub(r"^\\d{4}\\.\\d{2}\\.\\d{2}\\s*[｜|]\\s*", "", original)
+              topic = re.sub(r"^名爵168极速赛车房间号998788[｜|]微Q：1177368[｜|]", "", topic).strip()
+              new_date = (date(2026,10,16) + timedelta(days=n-1)).strftime("%Y.%m.%d")
+              new_title = f"{new_date}｜名爵168极速赛车房间号998788｜微Q：1177368｜{topic}"
+              new_text = "# " + new_title + sep + rest
+              if new_text != source:
+                  p.write_text(new_text, encoding="utf-8")
+                  updated += 1
+          print(f"Updated {updated} titles, 001={date(2026,10,16)}, 100={date(2026,10,16)+timedelta(days=99)}")
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add articles/
+          if ! git diff --cached --quiet; then
+            git commit -m "Retitle 100 articles with ordered dates and requested format"
+            git push
+          fi
