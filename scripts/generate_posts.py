@@ -78,7 +78,7 @@ def compose(title, body):
         "微Q：1177368\n\n"
         "网站：https://feitian168.com/\n"
     )
-    return metadata + "# " + title + "\n\n" + body + footer
+    return metadata + "# " + page_title + "\n\n" + body + footer
 
 def main():
     parser = argparse.ArgumentParser()
