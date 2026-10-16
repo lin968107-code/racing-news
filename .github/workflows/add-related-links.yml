@@ -1,0 +1,70 @@
+name: Add related article links
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/add-related-links.yml'
+permissions:
+  contents: write
+jobs:
+  add-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add related links to Markdown articles
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from urllib.parse import quote
+          import re
+
+          folder = Path("articles")
+          files = sorted(folder.glob("*.md"))
+          marker_start = "<!-- related-articles:start -->"
+          marker_end = "<!-- related-articles:end -->"
+          def batch(f):
+              match = re.match(r'^\d{3}-(\d{4}\.\d{2}\.\d{2})-',f.name)
+              if not match:
+                  return "other"
+              day=match.group(1)
+              if day < "2027.01.24": return "first"
+              if day < "2027.05.04": return "second"
+              if day < "2027.08.12": return "third"
+              if day < "2027.11.20": return "fourth"
+              if day < "2028.02.28": return "fifth"
+              return "sixth"
+          groups={}
+          for f in files: groups.setdefault(batch(f),[]).append(f)
+          changed=0
+          for group,items in groups.items():
+              if len(items)<2: continue
+              for idx,f in enumerate(items):
+                  candidates=[items[(idx+j)%len(items)] for j in range(1,min(9,len(items)))]
+                  lines=[marker_start,"","## 相关文章",""]
+                  for target in candidates:
+                      name=target.stem
+                      topic=name.split("-",5)[-1] if name.count("-")>=5 else name
+                      if len(topic)>68: topic=topic[-68:]
+                      url="https://github.com/lin968107-code/racing-news/blob/main/articles/"+quote(target.name)
+                      lines.extend([f"**{topic}**",f"来源：[{url}]({url})",""])
+                  lines.append(marker_end)
+                  text=f.read_text(encoding="utf-8")
+                  block="\n".join(lines)
+                  if marker_start in text and marker_end in text:
+                      text=re.sub(re.escape(marker_start)+r'.*?'+re.escape(marker_end),lambda m:block,text,flags=re.S)
+                  else:
+                      text=text.rstrip()+"\n\n---\n\n"+block+"\n"
+                  if text!=f.read_text(encoding="utf-8"):
+                      f.write_text(text,encoding="utf-8")
+                      changed+=1
+          print("total:",len(files),"updated:",changed)
+          PY
+      - name: Commit related links
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add articles
+          if ! git diff --cached --quiet; then
+            git commit -m "Add related internal GitHub article links"
+            git push
+          fi
