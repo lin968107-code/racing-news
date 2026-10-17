@@ -7,3 +7,14 @@ plugins:
   - jekyll-sitemap
 url: "https://lin968107-code.github.io"
 baseurl: "/racing-news"
+
+# GitHub repository Markdown archives are linked from GitHub directly.
+# Do not copy thousands of archive and draft files into the Pages site.
+exclude:
+  - articles
+  - _approved
+  - _drafts
+  - scripts
+  - .github
+  - "*.zip"
+  - README.md
