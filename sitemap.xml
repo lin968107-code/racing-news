@@ -3,12 +3,18 @@ layout: null
 ---
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>{{ '/' | absolute_url | xml_escape }}</loc>
-  </url>
+{% assign base_home = '/' | absolute_url %}
+  <url><loc>{{ base_home | xml_escape }}</loc></url>
 {% for post in site.posts %}
-  <url>
-    <loc>{{ post.url | absolute_url | xml_escape }}</loc>
-  </url>
+  <url><loc>{{ post.url | absolute_url | xml_escape }}</loc></url>
+{% endfor %}
+{% for page in site.pages %}
+  {% assign page_url = page.url | default: '' %}
+  {% assign ext = page.extname | downcase %}
+  {% unless page_url == '/' or page_url == '/index.html' or page_url contains 'sitemap.xml' or page_url contains '404.html' or page_url contains 'robots.txt' %}
+    {% if ext == '.md' or ext == '.html' %}
+  <url><loc>{{ page_url | absolute_url | xml_escape }}</loc></url>
+    {% endif %}
+  {% endunless %}
 {% endfor %}
 </urlset>
