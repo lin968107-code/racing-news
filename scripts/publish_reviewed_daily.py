@@ -91,9 +91,9 @@ def main():
         (DEST/name).write_text(data,encoding="utf-8")
         src.unlink()
     urls_path=DEST / "article_links.txt"
-    urls_path.write_text("\\n".join(
+    urls_path.write_text("\n".join(
         "https://github.com/lin968107-code/racing-news/blob/main/"
         + quote((DEST/name).as_posix()) for _,name,_ in accepted
-    ) + "\\n",encoding="utf-8")
+    ) + "\n",encoding="utf-8")
     print(f"Published {len(accepted)} articles to {DEST}; {len(files)-len(accepted)} queued/unqualified items remain.")
 if __name__=="__main__": main()
