@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+
+  {%- include head.html -%}
+
+  <body>
+
+    {%- include header.html -%}
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        {%- assign image_prefix = '/images/' | relative_url -%}
+        {%- assign project_image_src = 'src="' | append: image_prefix -%}
+        {{ content | replace: 'src="/images/', project_image_src | replace: 'src="../images/', project_image_src }}
+      </div>
+    </main>
+
+    {%- include footer.html -%}
+
+  </body>
+
+</html>

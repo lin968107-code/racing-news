@@ -1,0 +1,12 @@
+---
+layout: page
+title: 文章归档
+---
+<ul>
+  {% assign archive_pages = site.html_pages | sort: 'url' %}
+  {% for article in archive_pages %}
+    {% if article.url contains '/articles/' %}
+  <li><a href="{{ article.url | relative_url | escape }}">{{ article.title | default: article.name | escape }}</a></li>
+    {% endif %}
+  {% endfor %}
+</ul>

@@ -8,10 +8,28 @@ plugins:
 url: "https://lin968107-code.github.io"
 baseurl: "/racing-news"
 
-# GitHub repository Markdown archives are linked from GitHub directly.
-# Do not copy thousands of archive and draft files into the Pages site.
+# Keep navigation bounded: Minima otherwise scans every page for every link.
+header_pages:
+  - index.md
+  - archive.html
+  - 名爵168赛车专题合集.md
+
+# Restore the 1,021 archive pages from the last successful archive deployment
+# (9c4576515d034bd5102994f5adc55baf28892e74). Keep later archive additions
+# repository-only for now; restoring old URLs must not bulk-publish new pages.
 exclude:
-  - articles
+  - "articles/batch_*"
+  - "articles/daily_*"
+  - "articles/*-2029.10.[23]*-名爵168-飞天BV.md"
+  - "articles/*-2029.11.*-名爵168-飞天BV.md"
+  - "articles/*-2029.12.*-名爵168-飞天BV.md"
+  - "articles/*-2030.*-名爵168-飞天BV.md"
+  - "articles/2026-10-17-[0-9][0-9].md"
+  - articles/2026-10-17-noon-aa3a649085.md
+  - articles/2026-10-17-noon-b2cae16079.md
+  - articles/2026-10-17-seo-topic-index.md
+  - "articles/2026-10-18-[0-9][0-9].md"
+  - articles/2026-10-18-seo-topic-index.md
   - _approved
   - _drafts
   - scripts
